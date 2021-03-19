@@ -1,0 +1,6 @@
+twitch:
+  server: "irc.chat.twitch.tv"
+  port: 6667
+  nickname: "NICKNAME HERE"
+  token: "AUTH TOKEN HERE"
+  channel: "#huskerrs"
