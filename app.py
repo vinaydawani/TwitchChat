@@ -2,6 +2,8 @@ import socket
 import yaml
 import logging
 import io
+from datetime import datetime
+import re
 from emoji import demojize
 
 with open("config.yaml") as x:
@@ -22,15 +24,13 @@ logging.basicConfig(
     handlers=[logging.FileHandler(log_name, encoding="utf-8")],
 )
 
+formatter = logging.Formatter("%(asctime)s — %(message)s")
 log_capture_string = io.StringIO()
 ch = logging.StreamHandler(log_capture_string)
 ch.setLevel(logging.DEBUG)
+ch.setFormatter(formatter)
 
 logging.getLogger("").addHandler(ch)
-
-# logger = logging.getLogger('basic_logger')
-# logger.setLevel(logging.DEBUG)
-# formatter = logging.Formatter("%(asctime)s — %(message)s")
 
 resp = sock.recv(4096).decode("utf-8")
 resp = sock.recv(4096).decode("utf-8")
@@ -44,6 +44,17 @@ while True:
     elif len(resp) > 0:
         logging.info(demojize(resp))
         text = log_capture_string.getvalue()
-        print(text)
         log_capture_string.truncate(0)
         log_capture_string.seek(0)
+
+        time_logged = text.split(",")[0].strip()
+        time_logged = datetime.strptime(time_logged, "%Y-%m-%d %H:%M:%S")
+
+        username_message = text.split("—")[1:]
+        username_message = "—".join(username_message).strip()
+
+        username, channel, message = re.search(
+            ":(.*)\!.*@.*\.tmi\.twitch\.tv PRIVMSG #(.*) :(.*)", username_message
+        ).groups()
+
+        print(time_logged, username, channel, message)  # for csv file
